@@ -2,10 +2,10 @@
 #==============================================================================
 #title           :ccp
 #description     :This script will compact and copy on the fly using parellel gzip between different servers. It is useful to reduce the data traffic on the network.
-#author		 :Fabio Mota
+#author		 :Fabio Faria da Mota
 #date            :20140602
 #version         :1.0    
-#usage		 :ccp user@SOURCE_HOST:path user@REMOTE_HOST:path
+#usage		 :ccp user@SOURCE_HOST:path user@DESTINATION_HOST:path
 #notes           :Install pigz, nc and tar before use this script.
 #bash_version    :4.1.5(1)-release
 #==============================================================================
@@ -67,6 +67,6 @@ if ! ssh $DEST_USER$DEST_HOST stat $DEST_FILE_FULL \> /dev/null 2\>\&1
 fi
 				
 
-ssh $ORIG_USER$ORIG_HOST "tar -c -C $ORIG_FILE_DIR $ORIG_FILE_NAME | pigz -9 | nc -l $NC_PORT > /dev/null &"; 
-ssh $DEST_USER$DEST_HOST "cd $DEST_FILE_DIR; cd $DEST_FILE_FULL; nc $ORIG_HOST $NC_PORT | pigz -d | tar -xvf - " ;
+ssh $ORIG_USER$ORIG_HOST "tar -c -C $ORIG_FILE_DIR $ORIG_FILE_NAME | pigz -i9 | nc -w 1 -l $NC_PORT > /dev/null 2>&1 &"; 
+ssh -n $DEST_USER$DEST_HOST "cd $DEST_FILE_DIR; cd $DEST_FILE_FULL; nc  $ORIG_HOST $NC_PORT | pigz -d | tar xvf - " ;
 
